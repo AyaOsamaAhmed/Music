@@ -44,12 +44,13 @@
                 app:srcCompat="@drawable/repeat"
                 android:onClick="controlClick"
                 />
-            <android.support.v7.widget.AppCompatSeekBar
+            <SeekBar
                 android:id="@+id/seek_song_progressbar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:progress="0"
                 android:layout_weight="1"
+                android:progressDrawable="@drawable/seekbar_drawer"
                 android:onClick="controlClick"
                 />
                 <ImageButton

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@mipmap/music_back"
+    android:background="@mipmap/back"
     >
 
         <ListView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/list_music"
+            android:background="@mipmap/filter"
             android:layout_marginTop="70dp"
             ></ListView>
 
@@ -31,10 +32,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Play List"
+                android:text="List Music"
                 android:textSize="30sp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorYellow"
+                android:textColor="@color/colorDarkOrange"
                 android:textStyle="bold"
                 />
         </LinearLayout>
