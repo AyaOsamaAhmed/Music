@@ -76,6 +76,7 @@ public class PlaySong  extends AppCompatActivity {
             }
         });
 
+        //----- play song -------------
         try{
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
             AssetFileDescriptor afd = getAssets().openFd(SongName);// name music file
@@ -85,12 +86,12 @@ public class PlaySong  extends AppCompatActivity {
         } catch (IOException e) {
             Snackbar.make(parent_view,"Could not load audio file.",Snackbar.LENGTH_LONG).show();
         }
-
+        //------------------ seekbar ---------------
         videoUtils = new VideoUtils();
 
         seek_song_progressbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
             }
 
@@ -101,11 +102,7 @@ public class PlaySong  extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mhandler.removeCallbacks(mUpdateTimeTask);
-                int totalDuration = mp.getDuration();
-                int currentPosition = videoUtils.progressToTime(seekBar.getProgress(),totalDuration);
-                mp.seekTo(currentPosition);
-                mhandler.post(mUpdateTimeTask);
+
             }
         });
 
@@ -176,7 +173,7 @@ public class PlaySong  extends AppCompatActivity {
         if(!mp.isPlaying()){
             return;
         }
-        image.animate().setDuration(100).rotation(image.getRotation()+2f).setListener(new Animator.AnimatorListener() {
+        image.animate().setDuration(100).rotation(image.getRotation()+4f).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) { }
 
@@ -201,28 +198,35 @@ public class PlaySong  extends AppCompatActivity {
         public void run() {
             updateTimerAndSeekbar();
             if(mp.isPlaying()){
-              /*  long totalDuration = mp.getDuration();
-              String limit =videoUtils.milliSecondesToTime(totalDuration) ;
-                String[] keyValue = limit.split(":");
-                String limit_hour = keyValue[0];
-                String limit_min = keyValue[1];
-                int hour = Integer.parseInt(limit_hour)*60*60;
-                int min  =Integer.parseInt(limit_min)*60;*/
                 mhandler.postDelayed(this,100 );
             }
         }
     };
 
-    private void updateTimerAndSeekbar (){
+    private int getMaxSong (){
         long totalDuration = mp.getDuration();
-        long CurrentDuration = mp.getCurrentPosition();
+        String limit =videoUtils.milliSecondesToTime(totalDuration) ;
+        String[] keyValue = limit.split(":");
+        String limit_hour = keyValue[0];
+        String limit_min = keyValue[1];
+        int hour = Integer.parseInt(limit_hour)*60*60;
+        int min  =Integer.parseInt(limit_min)*60;
+
+        return hour + min ;
+    }
+
+    private void updateTimerAndSeekbar (){
+        Integer totalDuration = mp.getDuration();
+        Integer CurrentDuration = mp.getCurrentPosition();
 
         tv_song_total_duration.setText(videoUtils.milliSecondesToTime(totalDuration));
         tv_song_current_duration.setText(videoUtils.milliSecondesToTime(CurrentDuration));
 
-        seek_song_progressbar.setMax(1800);
+        seek_song_progressbar.setMax(totalDuration);
         int progress = (int) (videoUtils.getProgressSeekBar(CurrentDuration,totalDuration));
-        seek_song_progressbar.setProgress(progress);
+        seek_song_progressbar.setProgress(CurrentDuration);
+       // Toast.makeText(PlaySong.this, "progress: "+progress+"...current:"+CurrentDuration+"... max:"+seek_song_progressbar.getMax(), Toast.LENGTH_SHORT).show();
+
     }
 
     @Override

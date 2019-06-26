@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:background="@mipmap/back"
+        android:background="@mipmap/splash"
         android:paddingBottom="40dp"
         >
         <ImageView

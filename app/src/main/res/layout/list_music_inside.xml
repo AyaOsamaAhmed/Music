@@ -17,7 +17,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="left"
-            android:background="@mipmap/icon"
+            android:background="@mipmap/musicc"
             android:id="@+id/button_details"
 
             />
@@ -29,11 +29,19 @@
             android:textSize="@dimen/size_text"
             android:textStyle="bold"
             android:layout_gravity="left"
-            android:textColor="@color/colorDarkOrange"
+            android:textCursorDrawable="@drawable/seekbar_drawer"
+            android:textColor="@color/colorwhite"
             android:paddingTop="15dp"
             android:id="@+id/song_name"
             />
 
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@mipmap/line"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        />
 </LinearLayout>
