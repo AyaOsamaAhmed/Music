@@ -40,7 +40,8 @@ public class PlaySong  extends AppCompatActivity {
 
     private VideoUtils videoUtils;
 
-    public String  SongName   ;
+    public String  SongName ;
+    Integer     SongProgress =0  ,totalDuration , CurrentDuration ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,24 +94,37 @@ public class PlaySong  extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
+             //  if (SongProgress+100 != progress ){ seekSong(progress);}
+                   SongProgress = progress;
+                // mUpdateTimeTask.run();
+            //    Toast.makeText(PlaySong.this, "change", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 mhandler.removeCallbacks(mUpdateTimeTask);
+              //  Toast.makeText(PlaySong.this, "start", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
-        buttonPlayerAction();
+        buttonPlayerAction(null);
         updateTimerAndSeekbar();
     }
 
-    private void buttonPlayerAction(){
+    private void seekSong (int seek){
+
+        mp.seekTo(seek);
+        updateTimerAndSeekbar();
+        mUpdateTimeTask.run();
+    }
+
+    private void buttonPlayerAction(String action){
 
         btn_play.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,14 +132,23 @@ public class PlaySong  extends AppCompatActivity {
                 if(mp.isPlaying()){
                     mp.pause();
                     btn_play.setImageResource(R.drawable.ic_play_arrow);
+                    seek_song_progressbar.setEnabled(false);
                 }else{
                     mp.start();
                     btn_play.setImageResource(R.drawable.ic_pause);
+                    seek_song_progressbar.setEnabled(true);
+
                     mhandler.post(mUpdateTimeTask);
                 }
                 rotateTheDisk();
             }
         });
+
+        if (action == "stop"){
+            mp.pause();
+            btn_play.setImageResource(R.drawable.ic_play_arrow);
+            seek_song_progressbar.setEnabled(false);
+        }
     }
 
     public void controlClick(View v ){
@@ -198,7 +221,7 @@ public class PlaySong  extends AppCompatActivity {
         public void run() {
             updateTimerAndSeekbar();
             if(mp.isPlaying()){
-                mhandler.postDelayed(this,100 );
+                mhandler.postDelayed(this,1000);
             }
         }
     };
@@ -216,16 +239,15 @@ public class PlaySong  extends AppCompatActivity {
     }
 
     private void updateTimerAndSeekbar (){
-        Integer totalDuration = mp.getDuration();
-        Integer CurrentDuration = mp.getCurrentPosition();
+
+        totalDuration = mp.getDuration() ;
+        CurrentDuration = mp.getCurrentPosition();
 
         tv_song_total_duration.setText(videoUtils.milliSecondesToTime(totalDuration));
         tv_song_current_duration.setText(videoUtils.milliSecondesToTime(CurrentDuration));
-
         seek_song_progressbar.setMax(totalDuration);
         int progress = (int) (videoUtils.getProgressSeekBar(CurrentDuration,totalDuration));
         seek_song_progressbar.setProgress(CurrentDuration);
-       // Toast.makeText(PlaySong.this, "progress: "+progress+"...current:"+CurrentDuration+"... max:"+seek_song_progressbar.getMax(), Toast.LENGTH_SHORT).show();
 
     }
 
@@ -233,6 +255,12 @@ public class PlaySong  extends AppCompatActivity {
     protected void onDestroy() {
         mhandler.removeCallbacks(mUpdateTimeTask);
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        buttonPlayerAction("stop");
+        super.onBackPressed();
     }
 
     @Override

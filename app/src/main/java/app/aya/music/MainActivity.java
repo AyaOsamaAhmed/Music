@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,8 +31,7 @@ public class MainActivity extends AppCompatActivity {
         B_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent  intent = new Intent(MainActivity.this,ListMusic.class);
-                startActivity(intent);
+                Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
             }
         });
     }
