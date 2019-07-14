@@ -41,7 +41,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/colorwhite"
                 app:srcCompat="@drawable/repeat"
-                android:onClick="controlClick"
+
                 />
             <SeekBar
                 android:id="@+id/seek_song_progressbar"
@@ -58,7 +58,7 @@
                     android:id="@+id/btn_suffle"
                     android:tint="@color/colorwhite"
                     app:srcCompat="@drawable/ic_suffle"
-                    android:onClick="controlClick"
+
                     />
             </LinearLayout>
 
@@ -85,7 +85,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/colorDarkOrange"
                     app:srcCompat="@drawable/ic_skip_previous"
-                    android:onClick="controlClick"
+
                     />
                 <android.support.design.widget.FloatingActionButton
                     android:layout_width="wrap_content"
@@ -108,7 +108,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:tint="@color/colorDarkOrange"
                     app:srcCompat="@drawable/ic_skip_next"
-                    android:onClick="controlClick"
+
                     />
                 <TextView
                     android:layout_width="wrap_content"
@@ -165,6 +165,7 @@
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="@color/colorYellow"
                 android:textStyle="bold"
+                android:id="@+id/playing"
                 />
         </LinearLayout>
     </android.support.v7.widget.Toolbar>

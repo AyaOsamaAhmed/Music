@@ -12,7 +12,7 @@ public class ListMusic extends AppCompatActivity {
 
     ListView list_view;
     HashMap<String, String> list_name_music ;
-    ArrayList<HashMap<String, String>> list_music ;
+    HashMap<String, String> list_music ;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,20 +23,28 @@ public class ListMusic extends AppCompatActivity {
 
         musicList();
 
-        list_view.setAdapter(new ListViewAdapterMusic(ListMusic.this,list_music));
+        musicName();
+        list_view.setAdapter(new ListViewAdapterMusic(ListMusic.this,list_music,list_name_music));
     }
 
     private void musicList() {
-        list_name_music.put("name0","fairoz.mp3");
-
-
-        list_music.add(list_name_music);
+        list_music.put("name0","love_to_you.mp3");
+        list_music.put("name1","gany_lovely.mp3");
+        list_music.put("name2","flower_night.mp3");
+        list_music.put("name3","fairoz.mp3");
     }
 
+    public void musicName (){
+        list_name_music.put("key0","من حبى فيك يا جارى");
+        list_name_music.put("key1","جانى حبيبى");
+        list_name_music.put("key2","فى ليله ورد");
+        list_name_music.put("key3","فيروز");
+
+    }
     private void Bulider() {
         list_view = (ListView)findViewById(R.id.list_music);
         list_name_music = new HashMap<String, String>();
-        list_music =new ArrayList<HashMap<String, String>>();
+        list_music =new HashMap<String, String>();
 
     }
 }

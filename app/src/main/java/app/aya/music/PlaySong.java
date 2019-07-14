@@ -1,19 +1,22 @@
 package app.aya.music;
 
 import android.animation.Animator;
-import android.content.Intent;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSeekBar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -24,35 +27,74 @@ import android.widget.Toast;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
+import app.aya.music.media.MusicService;
+import app.aya.music.media.PlaybackInfoListener;
+import app.aya.music.media.PlayerAdapter;
 
 public class PlaySong  extends AppCompatActivity {
 
     private View parent_view ;
     private SeekBar seek_song_progressbar ;
-
-    private FloatingActionButton btn_play;
-
-    private TextView tv_song_current_duration ,tv_song_total_duration ;
+    private PlayerAdapter mPlayerAdapter;
+    private MusicService mMusicService;
+    private FloatingActionButton btn_play ;
+    private boolean mUserIsSeeking = false;
+    private TextView tv_song_current_duration ,tv_song_total_duration ,tv_playing;
     private CircularImageView image ;
-
+    private ImageButton btn_prev , btn_next , btn_repeat , btn_suffle ;
     private MediaPlayer mp ;
     private Handler mhandler = new Handler() ;
 
     private VideoUtils videoUtils;
+    private PlaybackListener mPlaybackListener;
+    public String  SongName , playing , current_position;
+    private Integer    totalDuration , CurrentDuration ;
+    private ArrayList<String>  serial_music ;
+    private ArrayList<String>  name_music ;
+    private Boolean             repeat =false , suffle =false;
 
-    public String  SongName ;
-    Integer     SongProgress =0  ,totalDuration , CurrentDuration ;
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            mMusicService = ((MusicService.LocalBinder) iBinder).getInstance();
+            mPlayerAdapter = mMusicService.getMediaPlayerHolder();
+
+            if (mPlaybackListener == null) {
+                mPlaybackListener = new PlaybackListener();
+                mPlayerAdapter.setPlaybackInfoListener(mPlaybackListener);
+            }
+            if (mPlayerAdapter != null && mPlayerAdapter.isPlaying()) {
+
+                restorePlayerStatus();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mMusicService = null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video);
 
-        SongName =getIntent().getStringExtra("songname");
+        serial_music = new ArrayList<String>();
+        name_music = new ArrayList<String>();
 
-        setMusicPlayerComponents();
+        SongName =getIntent().getStringExtra("songname");
+        playing =getIntent().getStringExtra("playing");
+        current_position = getIntent().getStringExtra("position");
+        serial_music = getIntent().getStringArrayListExtra("serial");
+        name_music = getIntent().getStringArrayListExtra("name");
+        setMusicPlayerComponents(SongName,playing);
     }
 
-    private void setMusicPlayerComponents() {
+    private void setMusicPlayerComponents(String song , String title_song) {
 
         parent_view=findViewById(R.id.parent);
         btn_play = findViewById(R.id.btn_play);
@@ -60,14 +102,67 @@ public class PlaySong  extends AppCompatActivity {
         seek_song_progressbar = findViewById(R.id.seek_song_progressbar);
         tv_song_current_duration = findViewById(R.id.tv_song_current_duration);
         tv_song_total_duration=findViewById(R.id.total_duration);
+        btn_next = findViewById(R.id.btn_next);
+        btn_prev = findViewById(R.id.btn_prev);
+        btn_repeat=findViewById(R.id.btn_repeat);
+        btn_suffle = findViewById(R.id.btn_suffle);
+        tv_playing = findViewById(R.id.playing);
         image = findViewById(R.id.image);
 
-        btn_play.setOnClickListener(new View.OnClickListener() {
+        tv_playing.setText(title_song);
+
+        final int color_orange = ContextCompat.getColor(this, R.color.colorDarkOrange);
+        final int color_white = ContextCompat.getColor(this, R.color.colorwhite);
+
+        btn_repeat.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
-                controlClick(view);
+                    if(repeat){
+                        repeat =false;
+                        btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
+                    }else if(!repeat) {
+                        repeat = true;
+                       // btn_repeat.setBackgroundTintList(ColorStateList.valueOf(0xFF4CA00f));
+                        btn_repeat.setImageTintList(ColorStateList.valueOf(color_orange));
+                    }
+
             }
         });
+
+
+        btn_suffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(suffle){
+                    suffle =false;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_suffle.setImageTintList(ColorStateList.valueOf(color_white));
+                    }
+                }else if(!suffle){
+                    suffle=true;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        btn_suffle.setImageTintList(ColorStateList.valueOf(color_orange));
+                    }
+                }
+            }
+        });
+
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nextMusic();
+            }
+        });
+
+        btn_prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                preMusic();
+            }
+        });
+
+
 
         mp = new MediaPlayer();
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -80,7 +175,7 @@ public class PlaySong  extends AppCompatActivity {
         //----- play song -------------
         try{
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            AssetFileDescriptor afd = getAssets().openFd(SongName);// name music file
+            AssetFileDescriptor afd = getAssets().openFd(song);// name music file
             mp.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
             afd.close();
             mp.prepare();
@@ -91,37 +186,81 @@ public class PlaySong  extends AppCompatActivity {
         videoUtils = new VideoUtils();
 
         seek_song_progressbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int userSelectedPosition = 0;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-             //  if (SongProgress+100 != progress ){ seekSong(progress);}
-                   SongProgress = progress;
-                // mUpdateTimeTask.run();
-            //    Toast.makeText(PlaySong.this, "change", Toast.LENGTH_SHORT).show();
-
+                if (fromUser) {
+                    userSelectedPosition = progress;
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 mhandler.removeCallbacks(mUpdateTimeTask);
-              //  Toast.makeText(PlaySong.this, "start", Toast.LENGTH_SHORT).show();
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                mp.seekTo(userSelectedPosition);
+                mhandler.post(mUpdateTimeTask);
             }
         });
 
         buttonPlayerAction(null);
         updateTimerAndSeekbar();
+
     }
 
-    private void seekSong (int seek){
+    private void nextMusic (){
+        int pos = Integer.parseInt(current_position)+1 ;
+        if(pos < serial_music.size()) {
+            String next = serial_music.get(pos);
+            String name = name_music.get(pos);
+            current_position = pos + "";
+            setMusicPlayerComponents(next, name);
+        }else {
+            Toast.makeText(this, "لا يوجد اغنيه تالية", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        mp.seekTo(seek);
-        updateTimerAndSeekbar();
-        mUpdateTimeTask.run();
+    private void preMusic (){
+
+        int pos = Integer.parseInt(current_position)- 1 ;
+        if (pos > -1) {
+            String next = serial_music.get(pos);
+            String name = name_music.get(pos);
+            current_position = pos + "";
+            setMusicPlayerComponents(next, name);
+        }else {
+            Toast.makeText(this, "لا يوجد اغنية سابقة", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void restorePlayerStatus() {
+        seek_song_progressbar.setEnabled(mPlayerAdapter.isMediaPlayer());
+
+        //if we are playing and the activity was restarted
+        //update the controls panel
+        if (mPlayerAdapter != null && mPlayerAdapter.isMediaPlayer()) {
+
+            mPlayerAdapter.onResumeActivity();
+            updatePlayingInfo(true, false);
+        }
+    }
+
+    private void updatePlayingInfo(boolean restore, boolean startPlay) {
+
+        if (startPlay) {
+            mPlayerAdapter.getMediaPlayer().start();
+        }
+
+        final int duration = mp.getDuration();
+        seek_song_progressbar.setMax(duration);
+
+        if (restore) {
+            seek_song_progressbar.setProgress(mPlayerAdapter.getPlayerPosition());
+
+        }
     }
 
     private void buttonPlayerAction(String action){
@@ -151,46 +290,9 @@ public class PlaySong  extends AppCompatActivity {
         }
     }
 
-    public void controlClick(View v ){
 
-        int id = v.getId();
-        switch (id){
-            case R.id.btn_next:{
-                toggleButtonColor((ImageButton)v);
-                Snackbar.make(parent_view,"text",Snackbar.LENGTH_SHORT).show();
-                break;
-            }
-            case R.id.btn_prev:{
-                toggleButtonColor((ImageButton )v);
-                Snackbar.make(parent_view,"Previous",Snackbar.LENGTH_SHORT).show();
-                break;
-            }
-            case R.id.btn_repeat:{
-                toggleButtonColor((ImageButton )v);
-                Snackbar.make(parent_view,"Repeat",Snackbar.LENGTH_SHORT).show();
-                break;
-            }
-            case R.id.btn_suffle:{
-                toggleButtonColor((ImageButton )v);
-                Snackbar.make(parent_view,"Shuffle",Snackbar.LENGTH_SHORT).show();
-                break;
-            }
-        }
-    }
 
-    private Boolean  toggleButtonColor (ImageButton bt){
 
-        String selected = (String) bt.getTag(bt.getId());
-        if(selected != null){
-            bt.setColorFilter(getResources().getColor(R.color.colorDarkOrange), PorterDuff.Mode.SRC_ATOP);
-            bt.setTag(bt.getId(),null);
-            return false;
-        }else{
-            bt.setColorFilter(getResources().getColor(R.color.colorYellow), PorterDuff.Mode.SRC_ATOP);
-            bt.setTag(bt.getId(),"selected");
-            return true;
-        }
-    }
 
     private void rotateTheDisk (){
         if(!mp.isPlaying()){
@@ -271,5 +373,28 @@ public class PlaySong  extends AppCompatActivity {
             Snackbar.make(parent_view,item.getTitle(),Snackbar.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    class PlaybackListener extends PlaybackInfoListener {
+
+        @Override
+        public void onPositionChanged(int position) {
+            if (!mUserIsSeeking) {
+                seek_song_progressbar.setProgress(position);
+            }
+        }
+
+        @Override
+        public void onStateChanged(@State int state) {
+
+            if (mPlayerAdapter.getState() != State.RESUMED && mPlayerAdapter.getState() != State.PAUSED) {
+                updatePlayingInfo(false, true);
+            }
+        }
+
+        @Override
+        public void onPlaybackCompleted() {
+            //After playback is complete
+        }
     }
 }
