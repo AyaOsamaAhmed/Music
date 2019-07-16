@@ -31,14 +31,16 @@ public class ListMusic extends AppCompatActivity {
         list_music.put("name0","love_to_you.mp3");
         list_music.put("name1","gany_lovely.mp3");
         list_music.put("name2","flower_night.mp3");
-        list_music.put("name3","fairoz.mp3");
+        list_music.put("name3","no_problem.mp3");
+        list_music.put("name4","fairoz.mp3");
     }
 
     public void musicName (){
         list_name_music.put("key0","من حبى فيك يا جارى");
         list_name_music.put("key1","جانى حبيبى");
         list_name_music.put("key2","فى ليله ورد");
-        list_name_music.put("key3","فيروز");
+        list_name_music.put("key3","ميشغلكش");
+        list_name_music.put("key4","فيروز");
 
     }
     private void Bulider() {

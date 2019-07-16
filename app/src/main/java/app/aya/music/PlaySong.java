@@ -28,6 +28,7 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import app.aya.music.media.MusicService;
 import app.aya.music.media.PlaybackInfoListener;
@@ -51,9 +52,10 @@ public class PlaySong  extends AppCompatActivity {
     private PlaybackListener mPlaybackListener;
     public String  SongName , playing , current_position;
     private Integer    totalDuration , CurrentDuration ;
+    Integer             currentSongIndex;
     private ArrayList<String>  serial_music ;
     private ArrayList<String>  name_music ;
-    private Boolean             repeat =false , suffle =false;
+    private Boolean             repeat =false , suffle =false ,change_repeat =false , change_suffle= false;
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -113,41 +115,53 @@ public class PlaySong  extends AppCompatActivity {
 
         final int color_orange = ContextCompat.getColor(this, R.color.colorDarkOrange);
         final int color_white = ContextCompat.getColor(this, R.color.colorwhite);
-
+        //----------------repeat
         btn_repeat.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
                     if(repeat){
                         repeat =false;
+                        change_repeat=true;
+                        mp.setLooping(false);
                         btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
                     }else if(!repeat) {
                         repeat = true;
-                       // btn_repeat.setBackgroundTintList(ColorStateList.valueOf(0xFF4CA00f));
+                        mp.setLooping(true);
                         btn_repeat.setImageTintList(ColorStateList.valueOf(color_orange));
-                    }
 
+                    }
+                message();
             }
         });
 
-
+        //------------------suffle
         btn_suffle.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
                 if(suffle){
                     suffle =false;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        btn_suffle.setImageTintList(ColorStateList.valueOf(color_white));
-                    }
-                }else if(!suffle){
+                    change_suffle=true;
+                    btn_suffle.setImageTintList(ColorStateList.valueOf(color_white));
+
+                }else if(!suffle ){
                     suffle=true;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        btn_suffle.setImageTintList(ColorStateList.valueOf(color_orange));
-                    }
+                    Random rand = new Random();
+                    currentSongIndex = rand.nextInt((serial_music.size() - 1) - 0 + 1) + 0;
+                    setSong(currentSongIndex);
+                    btn_suffle.setImageTintList(ColorStateList.valueOf(color_orange));
+                    //--------------
+                    repeat=false;
+                    change_repeat=true;
+                    mp.setLooping(false);
+                    btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
                 }
+                message();
             }
         });
 
+        //------------------next
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -211,13 +225,37 @@ public class PlaySong  extends AppCompatActivity {
 
     }
 
+    private void message (){
+
+        if (repeat) {
+            Toast.makeText(PlaySong.this, "سيتم تكرار هذه الاغنيه", Toast.LENGTH_SHORT).show();
+        }else if (!repeat && change_repeat){
+            Toast.makeText(PlaySong.this, "تم ألغاء تكرار الاغنية", Toast.LENGTH_SHORT).show();
+        }
+        //--------------------
+        if (suffle) {
+            Toast.makeText(PlaySong.this, "سيتم تكرار الاغانى بطريقة عشوائية", Toast.LENGTH_SHORT).show();
+        }else if (!suffle && change_suffle){
+            Toast.makeText(PlaySong.this, "تم ألغاء تكرار الاغانى بطريقة عشوائية", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setSong (int pos){
+
+        String next = serial_music.get(pos);
+        String name = name_music.get(pos);
+        mp.pause();
+        setMusicPlayerComponents(next, name);
+        mp.start();
+    }
+
     private void nextMusic (){
         int pos = Integer.parseInt(current_position)+1 ;
         if(pos < serial_music.size()) {
-            String next = serial_music.get(pos);
-            String name = name_music.get(pos);
             current_position = pos + "";
-            setMusicPlayerComponents(next, name);
+            mp.pause();
+            setSong(pos);
+            mp.start();
         }else {
             Toast.makeText(this, "لا يوجد اغنيه تالية", Toast.LENGTH_SHORT).show();
         }
@@ -227,10 +265,10 @@ public class PlaySong  extends AppCompatActivity {
 
         int pos = Integer.parseInt(current_position)- 1 ;
         if (pos > -1) {
-            String next = serial_music.get(pos);
-            String name = name_music.get(pos);
             current_position = pos + "";
-            setMusicPlayerComponents(next, name);
+            mp.pause();
+            setSong(pos);
+            mp.start();
         }else {
             Toast.makeText(this, "لا يوجد اغنية سابقة", Toast.LENGTH_SHORT).show();
         }
@@ -350,6 +388,7 @@ public class PlaySong  extends AppCompatActivity {
         seek_song_progressbar.setMax(totalDuration);
         int progress = (int) (videoUtils.getProgressSeekBar(CurrentDuration,totalDuration));
         seek_song_progressbar.setProgress(CurrentDuration);
+
 
     }
 
