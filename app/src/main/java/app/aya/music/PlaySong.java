@@ -125,11 +125,15 @@ public class PlaySong  extends AppCompatActivity {
                         change_repeat=true;
                         mp.setLooping(false);
                         btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
+                        if(suffle){
+                            suffle =false;
+                            change_suffle=true;
+                            btn_suffle.setImageTintList(ColorStateList.valueOf(color_white));
+                        }
                     }else if(!repeat) {
                         repeat = true;
                         mp.setLooping(true);
                         btn_repeat.setImageTintList(ColorStateList.valueOf(color_orange));
-
                     }
                 message();
             }
@@ -147,15 +151,15 @@ public class PlaySong  extends AppCompatActivity {
 
                 }else if(!suffle ){
                     suffle=true;
-                    Random rand = new Random();
-                    currentSongIndex = rand.nextInt((serial_music.size() - 1) - 0 + 1) + 0;
-                    setSong(currentSongIndex);
+                    suffle_song();
                     btn_suffle.setImageTintList(ColorStateList.valueOf(color_orange));
                     //--------------
-                    repeat=false;
-                    change_repeat=true;
-                    mp.setLooping(false);
-                    btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
+                    if(repeat) {
+                        repeat = false;
+                        change_repeat = true;
+                        mp.setLooping(false);
+                        btn_repeat.setImageTintList(ColorStateList.valueOf(color_white));
+                    }
                 }
                 message();
             }
@@ -183,6 +187,13 @@ public class PlaySong  extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 btn_play.setImageResource(R.drawable.ic_play_arrow);
+                Toast.makeText(PlaySong.this, "finish", Toast.LENGTH_SHORT).show();
+                if(repeat){mp.setLooping(true);}
+                else if(suffle){
+                    setSong(currentSongIndex);
+                    suffle_song();
+                    B_playing();
+                    }
             }
         });
 
@@ -225,6 +236,13 @@ public class PlaySong  extends AppCompatActivity {
 
     }
 
+    
+    private void suffle_song (){
+        Random rand = new Random();
+        currentSongIndex = rand.nextInt((serial_music.size() - 1) - 0 + 1) + 0;
+
+    }
+    
     private void message (){
 
         if (repeat) {
@@ -244,9 +262,9 @@ public class PlaySong  extends AppCompatActivity {
 
         String next = serial_music.get(pos);
         String name = name_music.get(pos);
-        mp.pause();
         setMusicPlayerComponents(next, name);
         mp.start();
+        btn_play.setImageResource(R.drawable.ic_pause);
     }
 
     private void nextMusic (){
@@ -306,17 +324,7 @@ public class PlaySong  extends AppCompatActivity {
         btn_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mp.isPlaying()){
-                    mp.pause();
-                    btn_play.setImageResource(R.drawable.ic_play_arrow);
-                    seek_song_progressbar.setEnabled(false);
-                }else{
-                    mp.start();
-                    btn_play.setImageResource(R.drawable.ic_pause);
-                    seek_song_progressbar.setEnabled(true);
-
-                    mhandler.post(mUpdateTimeTask);
-                }
+                B_playing();
                 rotateTheDisk();
             }
         });
@@ -328,8 +336,19 @@ public class PlaySong  extends AppCompatActivity {
         }
     }
 
+    private void B_playing() {
+        if(mp.isPlaying()){
+            mp.pause();
+            btn_play.setImageResource(R.drawable.ic_play_arrow);
+            seek_song_progressbar.setEnabled(false);
+        }else{
+            mp.start();
+            btn_play.setImageResource(R.drawable.ic_pause);
+            seek_song_progressbar.setEnabled(true);
 
-
+            mhandler.post(mUpdateTimeTask);
+        }
+    }
 
 
     private void rotateTheDisk (){
@@ -388,7 +407,7 @@ public class PlaySong  extends AppCompatActivity {
         seek_song_progressbar.setMax(totalDuration);
         int progress = (int) (videoUtils.getProgressSeekBar(CurrentDuration,totalDuration));
         seek_song_progressbar.setProgress(CurrentDuration);
-
+        rotateTheDisk();
 
     }
 

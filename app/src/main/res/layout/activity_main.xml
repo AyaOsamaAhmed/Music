@@ -31,7 +31,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="video"
+            android:text="فيديو"
             android:textSize="30sp"
             android:textColor="@color/colorwhite"
             android:textStyle="bold"
@@ -53,7 +53,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Music"
+            android:text="أغانى"
             android:textSize="30sp"
             android:textColor="@color/colorwhite"
             android:textStyle="bold"
