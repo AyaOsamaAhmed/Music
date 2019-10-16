@@ -16,8 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlaySong"/>
-    <activity android:name=".ListMusic"/>
+        <activity android:name=".play.PlaySong"/>
+    <activity android:name=".list.ListMusic"/>
         <activity android:name=".MainActivity"/>
 
     </application>

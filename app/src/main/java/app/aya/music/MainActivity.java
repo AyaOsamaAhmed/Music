@@ -8,22 +8,28 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import app.aya.music.list.ListMusic;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity {
 
-    Button     B_music , B_video ;
+    @BindView(R.id.video)
+    Button B_video;
+    @BindView(R.id.music)
+    Button B_music;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        B_music = (Button) findViewById(R.id.music);
-        B_video = (Button) findViewById(R.id.video);
+        ButterKnife.bind(this);
 
         B_music.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent  intent = new Intent(MainActivity.this,ListMusic.class);
+                Intent intent = new Intent(MainActivity.this, ListMusic.class);
                 startActivity(intent);
             }
         });

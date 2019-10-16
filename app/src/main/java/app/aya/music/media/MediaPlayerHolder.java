@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import app.aya.music.MainActivity;
-import app.aya.music.PlaySong;
+import app.aya.music.play.PlaySong;
 
 class MediaPlayerHolder implements PlayerAdapter,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener {

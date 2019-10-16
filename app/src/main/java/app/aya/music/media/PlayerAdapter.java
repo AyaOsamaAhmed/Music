@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import app.aya.music.PlaySong;
+import app.aya.music.play.PlaySong;
 
 public interface PlayerAdapter {
     void initMediaPlayer();

@@ -1,4 +1,4 @@
-package app.aya.music;
+package app.aya.music.play;
 
 public class VideoUtils {
 

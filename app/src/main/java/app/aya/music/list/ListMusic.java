@@ -1,12 +1,13 @@
-package app.aya.music;
+package app.aya.music.list;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import app.aya.music.R;
 
 public class ListMusic extends AppCompatActivity {
 

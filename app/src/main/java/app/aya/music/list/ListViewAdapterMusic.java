@@ -1,4 +1,4 @@
-package app.aya.music;
+package app.aya.music.list;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,12 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+
+import app.aya.music.play.PlaySong;
+import app.aya.music.R;
 
 public class ListViewAdapterMusic  extends BaseAdapter {
 
@@ -69,7 +70,7 @@ public class ListViewAdapterMusic  extends BaseAdapter {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent( context ,PlaySong.class);
+                Intent intent = new Intent( context , PlaySong.class);
                 intent.putExtra("songname",song_name);
                 intent.putExtra("playing",title);
                 intent.putExtra("position",position+"");
